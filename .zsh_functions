@@ -1,0 +1,254 @@
+# *********************************************************************************** #
+function prepmeti
+{
+  unset ROS_PACKAGE_PATH
+  source /opt/ros/hydro/setup.zsh
+  source /home/erik/Git/sandbox/meti/dry/install_isolated/setup.zsh
+  source /home/erik/Git/sandbox/meti/wet/devel/setup.zsh
+}
+
+# *********************************************************************************** #
+function prepdevelop
+{
+  unset ROS_PACKAGE_PATH
+  source /opt/ros/hydro/setup.zsh
+  source /home/erik/Git/develop/dry/install_isolated/setup.zsh
+  source /home/erik/Git/develop/wet/devel/setup.zsh
+}
+
+# *********************************************************************************** #
+function prepmast
+{
+  unset ROS_PACKAGE_PATH
+  source /opt/ros/hydro/setup.zsh
+  source /home/erik/Git/sandbox/mast_gt_cmu_example/dry/install_isolated/setup.zsh
+  source /home/erik/Git/sandbox/mast_gt_cmu_example/wet/devel/setup.zsh
+}
+
+# *********************************************************************************** #
+function compile_wet_sandbox
+{
+  CWD=$(pwd);
+  cd ~/Git/sandbox/$1/wet;
+  if [[ $# -eq 1 ]]; then
+    CMD="catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release"
+    echo ${CMD}
+    eval ${CMD}
+  elif [[ $# -eq 2 ]]; then
+    CMD="catkin_make --pkg ${2} --cmake-args -DCMAKE_BUILD_TYPE=Release"
+    echo ${CMD}
+    eval ${CMD}
+  fi
+  cd ${CWD};
+}
+alias csw='compile_wet_sandbox'
+
+# *********************************************************************************** #
+function compile_wet_sandbox_debug
+{
+  CWD=$(pwd);
+  cd ~/Git/sandbox/$1/wet;
+  if [[ $# -eq 1 ]]; then
+    CMD="catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Debug"
+    echo ${CMD}
+    eval ${CMD}
+  elif [[ $# -eq 2 ]]; then
+    CMD="catkin_make --pkg ${2} --cmake-args -DCMAKE_BUILD_TYPE=Debug"
+    echo ${CMD}
+    eval ${CMD}
+  fi
+  cd ${CWD};
+}
+alias cswd='compile_wet_sandbox_debug'
+
+# *********************************************************************************** #
+function compile_wet_develop
+{
+  CWD=$(pwd);
+  cd ~/Git/develop/wet;
+  if [[ $# -eq 0 ]]; then
+    CMD="catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release"
+    echo ${CMD}
+    eval ${CMD}
+  elif [[ $# -eq 1 ]]; then
+    CMD="catkin_make --pkg ${1} --cmake-args -DCMAKE_BUILD_TYPE=Release"
+    echo ${CMD}
+    eval ${CMD}
+  fi
+  cd ${CWD};
+}
+alias cdw='compile_wet_develop'
+
+# *********************************************************************************** #
+function check_syntax_develop_wet
+{
+  if [[ $# -eq 0 ]]; then
+    echo "\tERROR: check_syntax_develop_wet requires a ros package argument."
+    return
+  fi
+
+  roscd ${1}
+  checksyntax .
+  cd - > /dev/null
+}
+alias csdw='check_syntax_develop_wet'
+
+# *********************************************************************************** #
+function check_cpp_develop_wet
+{
+  if [[ $# -eq 0 ]]; then
+    echo "\tERROR: check_cpp_develop_wet requires a ros package argument."
+    return
+  fi
+
+  roscd ${1}
+  checkcpp .
+  cd - > /dev/null
+}
+alias ccdw='check_cpp_develop_wet'
+
+# *********************************************************************************** #
+function compile_wet_develop_debug
+{
+  CWD=$(pwd);
+  cd ~/Git/develop/wet;
+  if [[ $# -eq 0 ]]; then
+    CMD="catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Debug"
+    echo ${CMD}
+    eval ${CMD}
+  elif [[ $# -eq 1 ]]; then
+    CMD="catkin_make --pkg ${1} --cmake-args -DCMAKE_BUILD_TYPE=Debug"
+    echo ${CMD}
+    eval ${CMD}
+  fi
+  cd ${CWD};
+}
+alias cdwd='compile_wet_develop_debug'
+
+# *********************************************************************************** #
+function gitstatus
+{
+  for i in $(find . -maxdepth 1 -type d | tail -n +2);
+  do cd $i && echo $i && git status -uno && echo '\n' && cd .. ;
+  done
+}
+
+# *********************************************************************************** #
+function gitlist
+{
+  for i in $(find . -maxdepth 1 -type d | tail -n +2);
+  do cd $i && printf '%-25s\t\t%s\n' $i $(git rev-parse --abbrev-ref HEAD) && cd .. ;
+  done
+}
+
+# *********************************************************************************** #
+function gitfetch
+{
+  for i in $(find . -maxdepth 1 -type d | tail -n +2);
+  do cd $i && printf '%-25s\t\t%s\n' $i $(git fetch) && cd .. ;
+  done
+}
+
+# *********************************************************************************** #
+function gitpull
+{
+  for i in $(find . -maxdepth 1 -type d | tail -n +2);
+  do cd $i && echo $i && git pull && echo '\n' && cd .. ;
+  done
+}
+
+# *********************************************************************************** #
+function gitbranch
+{
+  for i in $(find . -maxdepth 1 -type d | tail -n +2);
+  do cd $i && echo $i && git branch -a; echo '\n' && cd .. ;
+  done
+}
+
+# *********************************************************************************** #
+function xportrosremote
+{
+  if [ $# -eq 0 ]; then
+    echo "\tERROR: Failed to read IP of remote host. Pass remote IP as argument to xportrosremote."
+  else
+    IP=$(ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
+    unset ROS_IP && unset ROS_HOSTNAME && unset ROS_MASTER_URI
+    export ROS_IP=$IP
+    export ROS_HOSTNAME=$IP
+    export ROS_MASTER_URI=http://$1:11311
+  fi
+}
+
+# *********************************************************************************** #
+function xportroslocal
+{
+  IP=$(ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
+  unset ROS_IP && unset ROS_HOSTNAME && unset ROS_MASTER_URI
+  export ROS_IP=$IP
+  export ROS_HOSTNAME=$IP
+  export ROS_MASTER_URI=http://$IP:11311
+}
+
+
+# *********************************************************************************** #
+function checkcpp
+{
+  RED='\033[31m'
+  YELLOW='\033[33m'
+  CYAN='\033[36m'
+  GREEN='\033[32m'
+  MAGENTA='\033[34m'
+  BLUE='\033[35m'
+  RESTORE='\033[0m'
+
+  OUTPUT=$(cppcheck --enable=all --inconclusive --template="[{file}: {line}]: [{severity}: {id}]: {message}" $@ 2>&1)
+
+  PRINTED=false
+  while read -r line
+  do
+
+    if [[ $line == *performance* ]] then; COLOR=${BLUE}
+    elif [[ $line == *style* ]] then; COLOR=${CYAN}
+    elif [[ $line == *warning* ]] then COLOR=${YELLOW}
+    elif [[ $line == *error* ]] then; COLOR=${RED}
+    elif [[ $line == *portability* ]] then; COLOR=${MAGENTA}
+    elif [[ $line == *information* ]] then; COLOR=${GREEN}
+    else; COLOR=${RESTORE}; fi
+
+    if [[ $line != *"Checking"*".."* && $line != *"files checked"*"done"* ]] then;
+      echo -e ${COLOR} $line ${RESTORE}
+      PRINTED=true
+    fi
+
+    # New line after each file has been checked
+    if [[ $line == *"files checked"*"done"* && "$PRINTED" = true ]] then
+      PRINTED=false
+      echo -e ''
+    fi
+
+  done <<< "$OUTPUT"
+}
+
+# *********************************************************************************** #
+function checksyntax
+{
+  # Loop over all arguments
+  for arg in "$@"
+  do
+    if [ -d "${arg}" ] ; then
+    # If argument is a directory, run cpp_check on all .h, .c, .cc, and .cpp files within
+      CPPFILES=$(find ${arg} -type f -name '*.cc' -print -o -name '*.h' -print -o -name '*.cpp' -print -o -name '*.c' -print)
+      CPPFILES=$(echo ${CPPFILES} | sort)
+
+      # Loop over files, calling cpp_check on them one by one
+      while read -r line
+      do
+        ~/Scripts/Python/cpp_check.py --verbose=0 --output=vs7 $line
+        echo -e ''
+      done <<< "${CPPFILES}"
+    else
+      # Otherwise, run the script on the file
+      ~/Scripts/Python/cpp_check.py --verbose=0 --output=vs7 $@
+    fi
+  done
+}

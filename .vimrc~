@@ -1,0 +1,253 @@
+" This line ensures various options are properly set to work with the Vim-related
+" packages available in Debian.
+runtime! debian.vim
+
+" Set the color scheme
+set t_Co=256
+colorscheme devbox-dark-256
+"set background=light
+"colorscheme solarized
+
+" Set font to inconsolata
+if has("gui_running")
+	if has("gui_gtk2")
+		set guifont=Inconsolata\ 12
+	elseif has("gui_win32")
+		set guifont=Consolas:h11:cANSI
+	endif
+endif
+
+" Enable syntax highlighting
+syntax on
+
+" Manage packages with pathogen
+execute pathogen#infect()
+
+" Enable plugins
+set nocp
+filetype plugin on
+filetype indent on
+
+" Make Vim jump to the last position when
+" reopening a file
+if has("autocmd")
+	au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+endif
+
+set showcmd           " Show (partial) command in status line.
+set showmatch         " Show matching brackets.
+set ignorecase        " Do case insensitive matching
+set smartcase         " Do smart case matching
+set incsearch         " Incremental search
+set mouse=a           " Enable mouse usage (all modes)
+
+set cul               " Highlight current line
+set cursorline
+hi CursorLine term=bold cterm=bold
+set ruler             " Show the line number on the bar
+set number            " Line numbers
+
+
+" These all get set in ~/.vim/indent/cpp.vim according to Google style guide
+"set autoindent        " generic autoindenting
+"set cindent           " autoindenting for C/C++ files
+set tabstop=2
+set shiftwidth=2      " 2 spaces for indents
+set smarttab          " a <Tab> in an indent inserts 'shiftwidth' space
+set expandtab         " spaces instead of tabs
+"set selectmode=mouse  " select when using the mouse
+"set laststatus=2      " always display a status line
+"set cinoptions+=:2    " no extra indent for c case labels
+"set cinoptions+=g0    " no extra indentation for public, protected, and private labels
+"set cino=g0,+0
+"set cinoptions+=(0    " line up function args
+
+" Disable automatic commenting
+"autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+
+" Recommended settings for Syntastic
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+"let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_cpp_compiler = 'gcc'
+let g:syntastic_cpp_remove_include_errors = 1
+"let g:syntastic_cpp_config_file='.syntastic_cpp_config'
+"let g:syntastic_c_include_dirs = [ '../include', 'include' ]
+"let b:syntastic_cpp_compiler_options='-linclude/random'
+"let g:syntastic_cpp_include_dirs = [ '../include', 'include' ]
+let g:syntastic_cpp_check_header = 1
+highlight SyntasticErrorString guifg=white guibg=red
+highlight SyntasticError guibg=#2f0000
+
+" Settings for NERDtree
+" - open when vim opens
+" - close if last window open
+" - remap to Ctrl+n
+" autocmd vimenter * NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+map <C-n> :NERDTreeToggle<CR>
+
+" Options for YouCompleteMe
+let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+
+" Clang-format
+"let g:clang_format#style_options = {
+"                  \ "AccessModifierOffset" : -4,
+"                  \ "AllowShortIfStatementsOnASingleLine" : "true",
+"                  \ "AllowBreakTemplateDeclarations" : "true",
+"                  \ "Standard" : "C++11"}
+"let g:clang_format#code_style='google'
+"let g:clang_format#command='/usr/bin/clang-format-3.4'
+map <silent> <Tab> :pyf /usr/share/vim/addons/syntax/clang-format-3.4.py<CR><CR>
+imap <silent> <Tab> <c-o>:pyf /usr/share/vim/addons/syntax/clang-format-3.4.py<CR><CR>
+
+set showmode          " show which mode (insert, replace, visual)
+
+set tw=80                  " start newlines after 80 columns
+match ErrorMsg '\%>80v.\+' " highlight all text past 80 columns
+
+" Redefine tab to reformat the buffer (in normal mode only)
+map <S-Tab> 0mz:set fileformat=unix<cr>:set endofline<cr>A<C-V><Tab><esc>:%s/<C-V><Tab>/  /g<cr>:%s/\s*$//<cr>:nohlsearch<cr>ggVG=`z
+
+" Move up or down 5 lines with shift
+:map <C-k> 5k
+:map <C-j> 5j
+:map <C-l> 5l
+:map <C-h> 5h
+
+" Remove trailing white space when writing
+autocmd BufWritePre * :%s/\s\+$//e
+
+" XML Formatting
+map <Leader>x :set filetype=xml<CR>
+			\:source $VIMRUNTIME/syntax/xml.vim<CR>
+			\:set foldmethod=syntax<CR>
+			\:source $VIMRUNTIME/syntax/syntax.vim<CR>
+			\:colors peachpuff<CR>
+			\:source $ADDED/xml.vim<CR>
+			\:iunmap <buffer> <Leader>.<CR>
+			\:iunmap <buffer> <Leader>><CR>
+			\:inoremap \> ><CR>
+
+au BufNewFile,BufRead *.launch set filetype=xml
+au BufNewFile,BufRead *.yaml set filetype=yaml
+au BufNewFile,BufRead *.xaml set filetype=xml
+au BufNewFile,BufRead *.txt set filetype=cmake
+au BufNewFile,BufRead *.{cc,cxx,cpp,h,hh,hpp,hxx} set filetype=cpp
+au BufNewFile,BufRead *.{unused,broken,broke,borked,old} set filetype=cpp
+
+set clipboard=unnamedplus
+
+" press w to cycle through open windows
+:map w <C-W>w
+
+""""""""""""""""""""""""" Other tips
+" Plugins:
+" - NERD commenter: commenting
+" - Syntastic: C++/C syntax highlighting
+" - YouCompleteMe: auto complete
+" - NERD tree: file browser
+" - hicursorwords: highlight the word under the cursor
+" - DoxygenToolkit: add doxytags
+" - ClangFormat: http://clang.llvm.org/docs/ClangFormat.html#vim-integration
+
+
+" setup taglists
+"function! AddTags()
+
+"  if isdirectory("include")
+"    exec 'TlistAddFilesRecursive ./include'
+"  endif
+"  if isdirectory("src")
+"    exec 'TlistAddFiles ./src/*'
+"  endif
+"  if isdirectory("test")
+"    exec 'TlistAddFiles ./test/*'
+"  endif
+"  if isdirectory("./../../include")
+"    exec 'TlistAddFiles ./*'
+"    exec 'TlistAddFilesRecursive ./../../include'
+"  endif
+"  if isdirectory("./../../src") && !isdirectory("./../../../wet")
+"    exec 'TlistAddFiles ./*'
+"    exec 'TlistAddFiles ./../../src/*'
+"  endif
+"  if isdirectory("./../test")
+"    exec 'TlistAddFiles ./*'
+"    exec 'TlistAddFiles ./../test/*'
+"  endif
+"  if isdirectory("./../../test")
+"    exec 'TlistAddFiles ./*'
+"    exec 'TlistAddFiles ./../../test/*'
+"  endif
+"  if isdirectory("./../src") && !isdirectory("./../../wet")
+"    exec 'TlistAddFiles ./*'
+"    exec 'TlistAddFiles ./../src/*'
+"  endif
+"endfunction
+
+"function! AddExternalTags(directory)
+"  if isdirectory(a:directory)
+"    let include = a:directory . "/include"
+"    let src = a:directory . "/src"
+"    let test = a:directory . "/test"
+"  elseif isdirectory("../" . a:directory)
+"    let include = "../" . a:directory . "/include"
+"    let src = "../" . a:directory . "/src"
+"    let test = "../" . a:directory . "/test"
+"  elseif isdirectory("../../" . a:directory)
+"    let include = "../../" . a:directory . "/include"
+"    let src = "../../" . a:directory . "/src"
+"    let test = "../../" . a:directory . "/test"
+"  elseif isdirectory("../../../" . a:directory)
+"    let include = "../../../" . a:directory . "/include"
+"    let src = "../../../" . a:directory . "/src"
+"    let test = "../../../" . a:directory . "/test"
+"  elseif isdirectory("../../../../" . a:directory)
+"    let include = "../../../../" . a:directory . "/include"
+"    let src = "../../../../" . a:directory . "/src"
+"    let test = "../../../../" . a:directory . "/test"
+"  endif
+"  if isdirectory(include)
+"    exec 'TlistAddFilesRecursive ' . include
+"  endif
+"  if isdirectory(src)
+"    exec 'TlistAddFilesRecursive ' . src
+"  endif
+"  if isdirectory(test)
+"    exec 'TlistAddFilesRecursive ' . test
+"  endif
+"endfunction
+":command -nargs=+ Add :call AddExternalTags('<args>')
+":cabbrev add Add
+
+" Call AddTags whenever opening a document
+"autocmd BufReadPost * :call AddTags()
+":map <C-e> :TlistToggle <CR>
+
+"let Tlist_GainFocus_On_ToggleOpen = 1
+"let Tlist_Close_On_Select = 0
+"let Tlist_Ctags_Cmd = '/usr/bin/ctags-exuberant'
+"let Tlist_Inc_Winwidth = 1
+"let Tlist_Auto_Open = 0
+"let Tlist_WinWidth = 50
+"let Tlist_Use_Right_Window = 1
+"let Tlist_Compact_Format = 1
+"let Tlist_Exit_OnlyWindow = 1
+"let Tlist_File_Folt_Auto_Close = 1
+
+"let g:DoxygenToolkit_briefTag_pre=""
+"let g:DoxygenToolkit_paramTag_post=" : "
+"let g:DoxygenToolkit_authorName="Erik Nelson"
+"let g:DoxygenToolkit_compactOneLineDoc="yes"
+"let g:DoxygenToolkit_compactDoc="yes"
+
+":map <C-g> :Dox <CR>
+":map <C-h> <esc> gg :DoxAuthor <CR>
+":map <C-l> :DoxLic <CR>
+"let g:load_doxygen_syntax=0
+

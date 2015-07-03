@@ -1,0 +1,5 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =3
+let g:netrw_dirhist_1='/home/erik/Git/toolkits/src/linear_algebra/cmake'
+let g:netrw_dirhist_2='/home/erik/Git/toolkits/src/geometry/cmake'
+let g:netrw_dirhist_3='/home/erik/Git/toolkits/src/string_util/src'
